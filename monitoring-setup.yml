@@ -1,0 +1,28 @@
+---
+- hosts: deb-clients
+  become: yes
+  tasks:
+    - name: Abhängigkeiten installieren
+      apt:
+        name:
+          - curl
+          - gnupg
+        state: present
+
+    - name: Webmin Setup Skript herunterladen
+      get_url:
+        url: https://raw.githubusercontent.com/webmin/webmin/master/webmin-setup-repos.sh
+        dest: /tmp/webmin-setup-repos.sh
+        mode: '0755'
+
+    - name: Webmin Setup Skript ausführen
+      command: sh /tmp/webmin-setup-repos.sh --force
+      become: yes
+      args:
+        creates: /etc/apt/sources.list.d/webmin.list
+
+    - name: Webmin installieren
+      apt:
+        name: webmin
+        state: present
+        install_recommends: yes
